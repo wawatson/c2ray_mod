@@ -215,12 +215,12 @@ contains
     ! Set the conv_criterion, if there are few sources we should make
     ! sure that things are converged around these sources.
     conv_criterion=min(int(convergence_fraction*mesh(1)*mesh(2)*mesh(3)), &
-         (NumSrc_Loc-1)/3) !> WW: Convergence currently set using local source
+         (NumSrc_Glob-1)/3) !> WW: Convergence currently set using local source
 			   !!counts. 
 
     ! Report time
     if (rank == control_rank) write(timefile,"(A,F8.1)") &
-         "Time before starting iteration: ", timestamp_wallclock ()
+         "Time before starting iteration: ", timestamp_wallclock()
 
     ! Iterate to reach convergence for multiple sources
     !> WW: Iteration to convergence now waits for each MPI
@@ -1000,15 +1000,15 @@ contains
     !WW    endif
 
     
-    ! WW: NB the '-1' needs to be in here to make sure the bounds of the loops
+    ! WW: NB the '+1' needs to be in here to make sure the bounds of the loops
     ! are correct (position versus grid point ennumeration issue)
 
-    lastpos_r(1) = (1+grid_struct(1))*mesh(1)-1
-    lastpos_r(2) = (1+grid_struct(2))*mesh(2)-1
-    lastpos_r(3) = (1+grid_struct(3))*mesh(3)-1
-    lastpos_l(1) = (grid_struct(1))*mesh(1)
-    lastpos_l(2) = (grid_struct(2))*mesh(2)
-    lastpos_l(3) = (grid_struct(3))*mesh(3)
+    lastpos_r(1) = (1+grid_struct(1))*mesh(1)
+    lastpos_r(2) = (1+grid_struct(2))*mesh(2)
+    lastpos_r(3) = (1+grid_struct(3))*mesh(3)
+    lastpos_l(1) = (grid_struct(1))*mesh(1)+1
+    lastpos_l(2) = (grid_struct(2))*mesh(2)+1
+    lastpos_l(3) = (grid_struct(3))*mesh(3)+1
 
 
 ! TODO NEED TO SORT OUT THE LIMITS OF THE LOOP HERE. ALSO, WHAT
@@ -1030,9 +1030,6 @@ contains
     photon_loss_src(:)=total_source_flux !-1.0 ! to pass the first while test
     last_r(:)=srcpos(:,ns) ! to pass the first while test
     last_l(:)=srcpos(:,ns) ! to pass the first while test
-
-!    if(rank.eq.1) print*,last_r(:),lastpos_r(:)
-
 
     ! Loop through boxes of increasing size
     ! NOTE: make this limit on the photon_loss a fraction of
